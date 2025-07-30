@@ -157,13 +157,12 @@
       }
     }
 
-    /* Overlay and Modal Box */
     .overlay {
       position: fixed;
       top: 0; left: 0;
       width: 100vw;
       height: 100vh;
-      background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent */
+      background-color: rgba(0, 0, 0, 0.5);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -220,12 +219,12 @@
     <div class="left-panel">
       <h2>Welcome to <strong>Pahana Edu</strong></h2>
 
-      <!-- Optional Error Message -->
+      <!-- Error Message -->
       <%
         String error = (String) request.getAttribute("errorMessage");
         if (error != null) {
       %>
-          <div class="alert alert-danger"><%= error %></div>
+        <div class="alert alert-danger"><%= error %></div>
       <%
         }
       %>
