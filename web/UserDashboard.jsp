@@ -1,32 +1,57 @@
-<%@ page import="java.sql.*" %>
+<%@ page import="java.sql.*, java.util.*" %>
 <%@ page session="true" %>
 <%
-    String name = (String) session.getAttribute("name");
+    // ----------------------------
+    // 1. Session Validation
+    // ----------------------------
     String accountNo = (String) session.getAttribute("accountNo");
-    String username = (String) session.getAttribute("username");
-    String address = (String) session.getAttribute("address");
-    String telephone = (String) session.getAttribute("telephone");
-
-    if (name == null || accountNo == null || username == null) {
-        response.sendRedirect("login.jsp");
+    if (accountNo == null) {
+        response.sendRedirect("Index.jsp");
         return;
     }
 
-    int billCount = 0;
-    String createdAt = "";
+    // ----------------------------
+    // 2. DTO - User Data Object
+    // ----------------------------
+    class User {
+        String name, username, address, telephone, createdAt;
+        int billCount;
+
+        // Getters
+        String getName() { return name; }
+        String getUsername() { return username; }
+        String getAccountNo() { return accountNo; }
+        String getAddress() { return address; }
+        String getTelephone() { return telephone; }
+        String getCreatedAt() { return createdAt; }
+        int getBillCount() { return billCount; }
+    }
+
+    // ----------------------------
+    // 3. DAO Logic (DB + Fetch)
+    // ----------------------------
+    User user = new User();
     try {
         Class.forName("com.mysql.cj.jdbc.Driver");
         Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/pahana_edu_db", "root", "");
 
+        // Fetch bill count
         PreparedStatement pst1 = con.prepareStatement("SELECT COUNT(*) FROM bill_images WHERE account_no = ?");
         pst1.setString(1, accountNo);
         ResultSet rs1 = pst1.executeQuery();
-        if (rs1.next()) billCount = rs1.getInt(1);
+        if (rs1.next()) user.billCount = rs1.getInt(1);
 
-        PreparedStatement pst2 = con.prepareStatement("SELECT created_at FROM users WHERE account_no = ?");
+        // Fetch user details
+        PreparedStatement pst2 = con.prepareStatement("SELECT * FROM users WHERE account_no = ?");
         pst2.setString(1, accountNo);
         ResultSet rs2 = pst2.executeQuery();
-        if (rs2.next()) createdAt = rs2.getString("created_at");
+        if (rs2.next()) {
+            user.name = rs2.getString("first_name");
+            user.username = rs2.getString("username");
+            user.address = rs2.getString("address");
+            user.telephone = rs2.getString("telephone");
+            user.createdAt = rs2.getString("created_at");
+        }
 
         rs1.close(); rs2.close(); pst1.close(); pst2.close(); con.close();
     } catch (Exception e) {
@@ -102,7 +127,7 @@
 
 <!-- Header -->
 <div class="header-bar">
-  <h2>Welcome, <%= name %></h2>
+  <h2>Welcome, <%= user.getName() %></h2>
   <p>Your personalized dashboard</p>
 </div>
 
@@ -112,19 +137,19 @@
     <div class="col-md-4">
       <div class="card-summary card-blue">
         <i class="fas fa-id-badge fa-2x mb-2"></i><br/>
-        Account No: <%= accountNo %>
+        Account No: <%= user.getAccountNo() %>
       </div>
     </div>
     <div class="col-md-4">
       <div class="card-summary card-yellow">
         <i class="fas fa-file-invoice fa-2x mb-2"></i><br/>
-        Bills: <%= billCount %>
+        Bills: <%= user.getBillCount() %>
       </div>
     </div>
     <div class="col-md-4">
       <div class="card-summary card-green">
         <i class="fas fa-phone fa-2x mb-2"></i><br/>
-        Tel: <%= telephone %>
+        Tel: <%= user.getTelephone() %>
       </div>
     </div>
   </div>
@@ -134,10 +159,10 @@
     <div class="col-md-6">
       <div class="detail-box">
         <h5 class="text-primary mb-4">Account Details</h5>
-        <p><strong>Username (NIC):</strong> <%= username %></p>
-        <p><strong>Full Name:</strong> <%= name %></p>
-        <p><strong>Address:</strong> <%= address %></p>
-        <p><strong>Created On:</strong> <%= createdAt %></p>
+        <p><strong>Username (NIC):</strong> <%= user.getUsername() %></p>
+        <p><strong>Full Name:</strong> <%= user.getName() %></p>
+        <p><strong>Address:</strong> <%= user.getAddress() %></p>
+        <p><strong>Created On:</strong> <%= user.getCreatedAt() %></p>
       </div>
     </div>
 
@@ -147,7 +172,7 @@
         <form action="UpdatePasswordServlet" method="post">
           <label>New Password</label>
           <input type="password" name="newPassword" class="form-control mb-3" required>
-          <input type="hidden" name="nic" value="<%= username %>">
+          <input type="hidden" name="nic" value="<%= user.getUsername() %>">
           <button type="submit" class="btn btn-outline-primary btn-action mb-3">Update Password</button>
         </form>
         <a href="UserBills.jsp" class="btn btn-info text-white btn-action"><i class="fas fa-file-invoice me-2"></i>View My Bills</a>
@@ -158,7 +183,7 @@
 
 <!-- Logout at Bottom -->
 <div class="logout-fixed">
-  <a href="logout.jsp" class="btn btn-danger w-100">
+  <a href="Logout.jsp" class="btn btn-danger w-100">
     <i class="fas fa-sign-out-alt me-2"></i> Logout
   </a>
 </div>
