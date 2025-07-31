@@ -1,5 +1,52 @@
 <%@ page import="java.sql.*" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%! 
+    // Inner class to act like a Model
+    public class DashboardStats {
+        private int customerCount;
+        private int itemCount;
+        private int billCount;
+
+        public int getCustomerCount() { return customerCount; }
+        public void setCustomerCount(int count) { this.customerCount = count; }
+
+        public int getItemCount() { return itemCount; }
+        public void setItemCount(int count) { this.itemCount = count; }
+
+        public int getBillCount() { return billCount; }
+        public void setBillCount(int count) { this.billCount = count; }
+    }
+
+    // DAO-like method to fetch stats
+    public DashboardStats fetchDashboardStats() {
+        DashboardStats stats = new DashboardStats();
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/pahana_edu_db", "root", "");
+            Statement stmt = con.createStatement();
+
+            ResultSet rs1 = stmt.executeQuery("SELECT COUNT(*) AS total FROM users");
+            if (rs1.next()) stats.setCustomerCount(rs1.getInt("total"));
+
+            ResultSet rs2 = stmt.executeQuery("SELECT COUNT(*) AS total FROM items");
+            if (rs2.next()) stats.setItemCount(rs2.getInt("total"));
+
+            ResultSet rs3 = stmt.executeQuery("SELECT COUNT(*) AS total FROM bill_images");
+            if (rs3.next()) stats.setBillCount(rs3.getInt("total"));
+
+            rs1.close(); rs2.close(); rs3.close(); stmt.close(); con.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return stats;
+    }
+%>
+
+<%
+    // Controller logic
+    DashboardStats stats = fetchDashboardStats();
+%>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -131,130 +178,105 @@
     <a href="AdminHelp.jsp"><i class="fas fa-info-circle me-2"></i>Help</a>
   </div>
   <a href="#" class="logout-btn" data-bs-toggle="modal" data-bs-target="#logoutModal">
-  <i class="fas fa-power-off me-2"></i>Exit System
-</a>
-
+    <i class="fas fa-power-off me-2"></i>Exit System
+  </a>
 </div>
 
 <!-- Dashboard Content -->
 <div class="dashboard-container text-center">
   <h2 class="mb-4">Admin Dashboard</h2>
 
-  <%
-    int customerCount = 0, itemCount = 0, billCount = 0;
-    try {
-      Class.forName("com.mysql.cj.jdbc.Driver");
-      Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/pahana_edu_db", "root", "");
-      Statement stmt = con.createStatement();
-
-      ResultSet rs1 = stmt.executeQuery("SELECT COUNT(*) AS total FROM users");
-      if (rs1.next()) customerCount = rs1.getInt("total");
-
-      ResultSet rs2 = stmt.executeQuery("SELECT COUNT(*) AS total FROM items");
-      if (rs2.next()) itemCount = rs2.getInt("total");
-
-      ResultSet rs3 = stmt.executeQuery("SELECT COUNT(*) AS total FROM bill_images");
-      if (rs3.next()) billCount = rs3.getInt("total");
-
-      rs1.close(); rs2.close(); rs3.close(); stmt.close(); con.close();
-    } catch (Exception e) {
-      out.println("<div class='text-danger'>DB Error: " + e.getMessage() + "</div>");
-    }
-  %>
-
   <!-- Row 1: 3 Cards -->
   <div class="row justify-content-center gx-4 gy-4">
     <div class="col-md-3">
-    <a href="ManageCustomers.jsp" class="text-decoration-none text-dark">
-      <div class="dashboard-card">
-        <div class="icon text-primary"><i class="fas fa-users"></i></div>
-        <div>
-          <small>Total Customers</small>
-          <h5><%= customerCount %></h5>
+      <a href="ManageCustomers.jsp" class="text-decoration-none text-dark">
+        <div class="dashboard-card">
+          <div class="icon text-primary"><i class="fas fa-users"></i></div>
+          <div>
+            <small>Total Customers</small>
+            <h5><%= stats.getCustomerCount() %></h5>
+          </div>
         </div>
-      </div>
-    </a>
-  </div>
+      </a>
+    </div>
     <div class="col-md-3">
-    <a href="ManageItems.jsp" class="text-decoration-none text-dark">
-      <div class="dashboard-card">
-        <div class="icon text-success"><i class="fas fa-book"></i></div>
-        <div>
-          <small>Total Items</small>
-          <h5><%= itemCount %></h5>
+      <a href="ManageItems.jsp" class="text-decoration-none text-dark">
+        <div class="dashboard-card">
+          <div class="icon text-success"><i class="fas fa-book"></i></div>
+          <div>
+            <small>Total Items</small>
+            <h5><%= stats.getItemCount() %></h5>
+          </div>
         </div>
-      </div>
-    </a>
-  </div>
+      </a>
+    </div>
     <div class="col-md-3">
-    <a href="Billing.jsp" class="text-decoration-none text-dark">
-      <div class="dashboard-card">
-        <div class="icon text-warning"><i class="fas fa-file-invoice-dollar"></i></div>
-        <div>
-          <small>Bills Generated</small>
-          <h5><%= billCount %></h5>
+      <a href="Billing.jsp" class="text-decoration-none text-dark">
+        <div class="dashboard-card">
+          <div class="icon text-warning"><i class="fas fa-file-invoice-dollar"></i></div>
+          <div>
+            <small>Bills Generated</small>
+            <h5><%= stats.getBillCount() %></h5>
+          </div>
         </div>
-      </div>
-    </a>
-  </div>
+      </a>
+    </div>
   </div>
 
   <!-- Row 2: 2 Cards -->
   <div class="row justify-content-center gx-4 gy-4 mt-3">
     <div class="col-md-3">
-    <a href="Register.jsp" class="text-decoration-none text-dark">
-      <div class="dashboard-card">
-        <div class="icon text-secondary"><i class="fas fa-user-plus"></i></div>
-        <div>
-          <small>Add New Customer</small>
-          <h5>Create Account</h5>
+      <a href="Register.jsp" class="text-decoration-none text-dark">
+        <div class="dashboard-card">
+          <div class="icon text-secondary"><i class="fas fa-user-plus"></i></div>
+          <div>
+            <small>Add New Customer</small>
+            <h5>Create Account</h5>
+          </div>
         </div>
-      </div>
-    </a>
-  </div>
-      
-      
-   <div class="col-md-3">
-    <a href="AdminMessages.jsp" class="text-decoration-none text-dark">
-      <div class="dashboard-card">
-        <div class="icon text-danger"><i class="fas fa-envelope"></i></div>
-        <div>
-          <small>Contact Messages</small>
-          <h6>View & Reply</h6>
+      </a>
+    </div>
+    <div class="col-md-3">
+      <a href="AdminMessages.jsp" class="text-decoration-none text-dark">
+        <div class="dashboard-card">
+          <div class="icon text-danger"><i class="fas fa-envelope"></i></div>
+          <div>
+            <small>Contact Messages</small>
+            <h6>View & Reply</h6>
+          </div>
         </div>
-      </div>
-    </a>
+      </a>
+    </div>
   </div>
 
   <!-- Row 3: 2 Cards -->
   <div class="row justify-content-center gx-4 gy-4 mt-3">
     <div class="col-md-3">
-    <a href="Billinghistory.jsp" class="text-decoration-none text-dark">
-      <div class="dashboard-card">
-        <div class="icon text-primary"><i class="fas fa-history"></i></div>
-        <div>
-          <small>Bill History</small>
-          <h5>View & Manage</h5>
+      <a href="Billinghistory.jsp" class="text-decoration-none text-dark">
+        <div class="dashboard-card">
+          <div class="icon text-primary"><i class="fas fa-history"></i></div>
+          <div>
+            <small>Bill History</small>
+            <h5>View & Manage</h5>
+          </div>
         </div>
-      </div>
-    </a>
-  </div>
-      
-      
-   <div class="col-md-3">
-    <a href="AdminHelp.jsp" class="text-decoration-none text-dark">
-      <div class="dashboard-card">
-        <div class="icon text-info"><i class="fas fa-question-circle"></i></div>
-        <div>
-          <small>System Help</small>
-          <h6>Usage Guide</h6>
+      </a>
+    </div>
+    <div class="col-md-3">
+      <a href="AdminHelp.jsp" class="text-decoration-none text-dark">
+        <div class="dashboard-card">
+          <div class="icon text-info"><i class="fas fa-question-circle"></i></div>
+          <div>
+            <small>System Help</small>
+            <h6>Usage Guide</h6>
+          </div>
         </div>
-      </div>
-    </a>
-  </div>
+      </a>
+    </div>
   </div>
 </div>
-<!-- Logout Confirmation Modal -->
+
+<!-- Logout Modal -->
 <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-danger">
@@ -272,7 +294,7 @@
     </div>
   </div>
 </div>
- 
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
