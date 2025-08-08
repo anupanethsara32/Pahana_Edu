@@ -43,19 +43,7 @@
   <url-pattern>/DeleteBillServlet</url-pattern>
 </servlet-mapping>
 
-
-<servlet>
-    <servlet-name>UploadProfilePicServlet</servlet-name>
-    <servlet-class>servlets.UploadProfilePicServlet</servlet-class>
-</servlet>
-
-<servlet-mapping>
-    <servlet-name>UploadProfilePicServlet</servlet-name>
-    <url-pattern>/UploadProfilePicServlet</url-pattern>
-</servlet-mapping>
-
-
-    <!-- Welcome File -->
+<!-- Welcome File -->
     <welcome-file-list>
         <welcome-file>Index.jsp</welcome-file>
     </welcome-file-list>
