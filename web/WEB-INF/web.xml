@@ -4,7 +4,46 @@
          http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
          version="3.1">
 
-    <!-- Welcome File -->
+    <!-- Login Servlet -->
+    <servlet>
+        <servlet-name>LoginServlet</servlet-name>
+        <servlet-class>LoginServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>LoginServlet</servlet-name>
+        <url-pattern>/LoginServlet</url-pattern>
+    </servlet-mapping>
+
+    <!-- Get Customer Info Servlet -->
+    <servlet>
+        <servlet-name>GetCustomerInfoServlet</servlet-name>
+        <servlet-class>GetCustomerInfoServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>GetCustomerInfoServlet</servlet-name>
+        <url-pattern>/GetCustomerInfoServlet</url-pattern>
+    </servlet-mapping>
+
+    <!-- ✅ Billing Servlet -->
+    <servlet>
+        <servlet-name>BillingServlet</servlet-name>
+        <servlet-class>BillingServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>BillingServlet</servlet-name>
+        <url-pattern>/BillingServlet</url-pattern>
+    </servlet-mapping>
+    
+    <servlet>
+  <servlet-name>DeleteBillServlet</servlet-name>
+  <servlet-class>DeleteBillServlet</servlet-class>
+</servlet>
+<servlet-mapping>
+  <servlet-name>DeleteBillServlet</servlet-name>
+  <url-pattern>/DeleteBillServlet</url-pattern>
+</servlet-mapping>
+
+<!-- Welcome File -->
     <welcome-file-list>
         <welcome-file>Index.jsp</welcome-file>
     </welcome-file-list>
