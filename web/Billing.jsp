@@ -66,12 +66,13 @@
       padding: 30px;
     }
     .card {
-      border-radius: 20px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      border: none;
+      box-shadow: none;
       padding: 30px;
-      background-color: #fff;
+      background-color: transparent;
     }
-    .autocomplete-items {
+
+    .autocomplet    e-items {
       position: absolute;
       z-index: 999;
       width: 100%;
@@ -95,6 +96,19 @@
     }
     .form-label {
       font-weight: 500;
+    }
+        #successAlert {
+      display: none;
+      position: fixed;
+      top: 20%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1055;
+      width: auto;
+      min-width: 300px;
+      text-align: center;
+      padding: 20px;
+      font-size: 18px;
     }
   </style>
 </head>
@@ -124,7 +138,8 @@
 <div class="content">
   <div class="container-fluid">
     <div class="card">
-      <h2 class="mb-4 no-print text-center text-primary">Create New Bill</h2>
+      <h2 class="mb-4 no-print text-black">Create New Bill</h2>
+
       <form method="post" action="BillingServlet" id="billForm">
         <!-- Customer Autocomplete -->
         <div class="mb-3 position-relative no-print">
@@ -366,5 +381,56 @@
   }
 </script>
 
+<!-- Success Alert -->
+<div id="successAlert" class="alert alert-success shadow-lg" role="alert">
+  <strong>✔ Saved Bill!</strong> Your bill has been successfully saved.
+</div>
+
+<script>
+function showAlert() {
+  const alert = document.getElementById("successAlert");
+  alert.style.display = "block";
+  alert.classList.add("show");
+
+  setTimeout(() => {
+    alert.classList.remove("show");
+    alert.style.display = "none";
+  }, 3000);
+}
+
+function closeAlert() {
+  const alert = document.getElementById("successAlert");
+  alert.classList.remove("show");
+  alert.style.display = "none";
+}
+</script>
+
+<script>
+// Existing JavaScript logic...
+function submitWithImage() {
+  if (!selectedCustomerInfo.nic || document.getElementById("billTableBody").rows.length === 0) {
+    alert("Please select a customer and add at least one item.");
+    return;
+  }
+
+  const inputSection = document.getElementById("itemInputSection");
+  inputSection.style.display = "none";
+
+  setTimeout(() => {
+    html2canvas(document.getElementById("billContent")).then(canvas => {
+      document.getElementById("billImageInput").value = canvas.toDataURL("image/png");
+      inputSection.style.display = "";
+
+      // Show alert before form submit
+      showAlert();
+
+      // Submit the form after short delay to show the alert
+      setTimeout(() => {
+        document.getElementById("billForm").submit();
+      }, 1500);
+    });
+  }, 200);
+}
+</script>
 </body>
 </html>

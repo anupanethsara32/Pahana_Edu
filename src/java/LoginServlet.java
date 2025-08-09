@@ -42,15 +42,21 @@ public class LoginServlet extends HttpServlet {
         String login(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException;
     }
 
-    // Admin Strategy
+    // Admin Strategy (sets role + session + loginSuccess flag)
     static class AdminLoginStrategy implements LoginStrategy {
         @Override
         public String login(HttpServletRequest request, HttpServletResponse response) {
+            HttpSession session = request.getSession(true);
+            session.setAttribute("username", "Admin");
+            session.setAttribute("name", "System Admin");
+            session.setAttribute("role", "ADMIN");
+            session.setAttribute("loginSuccess", "true");  // <-- show success overlay on AdminDashboard.jsp
+            session.setMaxInactiveInterval(30 * 60);
             return "AdminDashboard.jsp";
         }
     }
 
-    // User Strategy
+    // User Strategy (validates via DB; sets role + loginSuccess flag)
     static class UserLoginStrategy implements LoginStrategy {
         @Override
         public String login(HttpServletRequest request, HttpServletResponse response) throws ServletException {
@@ -66,13 +72,15 @@ public class LoginServlet extends HttpServlet {
                 ResultSet rs = pst.executeQuery();
 
                 if (rs.next()) {
-                    HttpSession session = request.getSession();
+                    HttpSession session = request.getSession(true);
                     session.setAttribute("username", rs.getString("username"));
                     session.setAttribute("name", rs.getString("first_name"));
                     session.setAttribute("accountNo", rs.getString("account_no"));
                     session.setAttribute("address", rs.getString("address"));
                     session.setAttribute("telephone", rs.getString("telephone"));
-                    session.setAttribute("loginSuccess", "true");
+                    session.setAttribute("role", "USER");
+                    session.setAttribute("loginSuccess", "true"); // <-- show overlay on user flow (Index.jsp)
+                    session.setMaxInactiveInterval(30 * 60);
                     return "Index.jsp";
                 } else {
                     request.setAttribute("errorMessage", "Invalid NIC or password!");
@@ -84,10 +92,10 @@ public class LoginServlet extends HttpServlet {
         }
     }
 
-    // Factory Class
+    // Factory
     static class LoginStrategyFactory {
         public static LoginStrategy getStrategy(String username, String password) {
-            if ("Admin".equals(username) && "518173".equals(password)) {
+            if ("Admin".equals(username) && "1212".equals(password)) { // <-- your admin password
                 return new AdminLoginStrategy();
             }
             return new UserLoginStrategy();

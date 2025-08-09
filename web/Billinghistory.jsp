@@ -124,7 +124,7 @@
 
 <!-- Main Content -->
 <div class="content">
-  <h2 class="mb-4 text-center text-primary">Bill History</h2>
+  <h2 class="mb-4 text-center " style="color:#000;">Bill History</h2>
 
   <!-- Message display -->
   <%
