@@ -44,6 +44,7 @@
       flex-direction: column;
       justify-content: space-between;
     }
+    
     .sidebar h4 {
       text-align: center;
       font-weight: bold;
@@ -118,7 +119,8 @@
 <!-- Main Content -->
 <div class="content">
   <div class="container">
-    <h2 class="mb-4 text-primary">Contact Messages</h2>
+    <h2 class="mb-4" style="color:#000;">Contact Messages</h2>
+
     <div class="table-responsive">
       <table class="table table-bordered table-hover">
         <thead class="table-light">

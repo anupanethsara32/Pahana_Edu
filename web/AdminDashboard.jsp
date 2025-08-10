@@ -1,51 +1,71 @@
 <%@ page import="java.sql.*" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%! 
-    // Inner class to act like a Model
-    public class DashboardStats {
-        private int customerCount;
-        private int itemCount;
-        private int billCount;
 
-        public int getCustomerCount() { return customerCount; }
-        public void setCustomerCount(int count) { this.customerCount = count; }
-
-        public int getItemCount() { return itemCount; }
-        public void setItemCount(int count) { this.itemCount = count; }
-
-        public int getBillCount() { return billCount; }
-        public void setBillCount(int count) { this.billCount = count; }
+<%
+    HttpSession _sess = request.getSession(false);
+    String _role = (_sess == null) ? null : (String) _sess.getAttribute("role");
+    if (_sess == null || _sess.getAttribute("username") == null || !"ADMIN".equals(_role)) {
+        response.sendRedirect("Index.jsp");
+        return;
     }
+    response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+    response.setHeader("Pragma", "no-cache");
+    response.setDateHeader("Expires", 0);
+%>
 
-    // DAO-like method to fetch stats
+<%! 
+    public static class DashboardStats {
+        private int customerCount, itemCount, billCount;
+        public int getCustomerCount() { return customerCount; }
+        public void setCustomerCount(int v) { customerCount = v; }
+        public int getItemCount() { return itemCount; }
+        public void setItemCount(int v) { itemCount = v; }
+        public int getBillCount() { return billCount; }
+        public void setBillCount(int v) { billCount = v; }
+    }
     public DashboardStats fetchDashboardStats() {
         DashboardStats stats = new DashboardStats();
+        String url = "jdbc:mysql://localhost:3306/pahana_edu_db", user = "root", pass = "";
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/pahana_edu_db", "root", "");
-            Statement stmt = con.createStatement();
-
-            ResultSet rs1 = stmt.executeQuery("SELECT COUNT(*) AS total FROM users");
-            if (rs1.next()) stats.setCustomerCount(rs1.getInt("total"));
-
-            ResultSet rs2 = stmt.executeQuery("SELECT COUNT(*) AS total FROM items");
-            if (rs2.next()) stats.setItemCount(rs2.getInt("total"));
-
-            ResultSet rs3 = stmt.executeQuery("SELECT COUNT(*) AS total FROM bill_images");
-            if (rs3.next()) stats.setBillCount(rs3.getInt("total"));
-
-            rs1.close(); rs2.close(); rs3.close(); stmt.close(); con.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            try (Connection con = DriverManager.getConnection(url, user, pass);
+                 Statement st = con.createStatement();
+                 ResultSet rs = st.executeQuery("SELECT COUNT(*) AS total FROM users")) {
+                if (rs.next()) stats.setCustomerCount(rs.getInt("total"));
+            }
+            try (Connection con = DriverManager.getConnection(url, user, pass);
+                 Statement st = con.createStatement();
+                 ResultSet rs = st.executeQuery("SELECT COUNT(*) AS total FROM items")) {
+                if (rs.next()) stats.setItemCount(rs.getInt("total"));
+            }
+            try (Connection con = DriverManager.getConnection(url, user, pass);
+                 Statement st = con.createStatement();
+                 ResultSet rs = st.executeQuery("SELECT COUNT(*) AS total FROM bill_images")) {
+                if (rs.next()) stats.setBillCount(rs.getInt("total"));
+            }
+        } catch (Exception e) { e.printStackTrace(); }
         return stats;
     }
 %>
 
 <%
-    // Controller logic
     DashboardStats stats = fetchDashboardStats();
+    String _loginSuccess = (String) session.getAttribute("loginSuccess");
+    if ("true".equals(_loginSuccess)) {
+        session.removeAttribute("loginSuccess");
 %>
+<div style="position:fixed; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:center; justify-content:center; z-index:9999;">
+  <div style="background:#fff; padding:30px; border-radius:10px; text-align:center; box-shadow:0 0 20px rgba(0,0,0,.10);">
+    <div style="font-size:40px; color:#28a745; margin-bottom:10px;"><i class="fas fa-check-circle"></i></div>
+    <h3>Login Successful</h3>
+    <p>Welcome back, Admin!</p>
+  </div>
+</div>
+<script>
+  setTimeout(() => { document.querySelector('[style*="position:fixed"]').remove(); }, 2000);
+</script>
+<% } %>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -96,7 +116,7 @@
     .dashboard-card small {
       color: #6c757d;
       display: block;
-      font-size: 25px;
+      font-size: 20px;
     }
 
     .sidebar {
@@ -236,6 +256,7 @@
         </div>
       </a>
     </div>
+      
     <div class="col-md-3">
       <a href="AdminMessages.jsp" class="text-decoration-none text-dark">
         <div class="dashboard-card">

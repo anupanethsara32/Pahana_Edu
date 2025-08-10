@@ -1,3 +1,37 @@
+<%@ page import="java.sql.*" %>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Print Bill</title>
+  <style>
+    /* Hide unwanted elements in print view */
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+      .sidebar {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar no-print">
+  <h2>Pahana Edu</h2>
+  <ul>
+    <li>Dashboard</li>
+    <li>Add New Customer</li>
+    <li>Manage Customers</li>
+    <li>Manage Items</li>
+    <li>Billing</li>
+    <li>Bill History</li>
+    <li>Contact Messages</li>
+    <li>Help</li>
+  </ul>
+</div>
+
 <!-- Item Inputs -->
 <div class="row g-3 mb-4 no-print">
   <div class="col-md-4">
@@ -14,7 +48,13 @@
       <option value="<%=rs.getString("item_code")%>" data-price="<%=rs.getDouble("price")%>">
         <%=rs.getString("item_name")%> (<%=rs.getString("item_code")%>)
       </option>
-      <% } con.close(); } catch (Exception e) { out.print("<option>Error loading items</option>"); } %>
+      <% 
+          } 
+          con.close(); 
+        } catch (Exception e) { 
+          out.print("<option>Error loading items</option>"); 
+        } 
+      %>
     </select>
   </div>
 
@@ -37,3 +77,8 @@
     <button type="button" class="btn btn-primary w-100" onclick="addToTable()">Add</button>
   </div>
 </div>
+
+<!-- Rest of your bill content -->
+
+</body>
+</html>
