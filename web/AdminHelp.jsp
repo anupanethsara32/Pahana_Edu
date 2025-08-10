@@ -127,7 +127,7 @@
   <div>
     <h4>Pahana Edu</h4>
     <a href="AdminDashboard.jsp"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a>
-    <a href="Register.jsp"><i class="fas fa-user-plus me-2"></i>Add New Customer</a>
+    <a href="RegisterAdmin.jsp"><i class="fas fa-user-plus me-2"></i>Add New Customer</a>
     <a href="ManageCustomers.jsp"><i class="fas fa-users me-2"></i>Manage Customers</a>
     <a href="ManageItems.jsp"><i class="fas fa-book me-2"></i>Manage Items</a>
     <a href="Billing.jsp"><i class="fas fa-file-invoice me-2"></i>Billing</a>

@@ -48,6 +48,15 @@
         <url-pattern>/DeleteBillServlet</url-pattern>
     </servlet-mapping>
 
+<servlet>
+  <servlet-name>RegisterServlet</servlet-name>
+  <servlet-class>RegisterServlet</servlet-class>
+</servlet>
+<servlet-mapping>
+  <servlet-name>RegisterServlet</servlet-name>
+  <url-pattern>/RegisterServlet</url-pattern>
+</servlet-mapping>
+
     <!-- Welcome File -->
     <welcome-file-list>
         <welcome-file>Index.jsp</welcome-file>

@@ -246,7 +246,7 @@
   <!-- Row 2: 2 Cards -->
   <div class="row justify-content-center gx-4 gy-4 mt-3">
     <div class="col-md-3">
-      <a href="Register.jsp" class="text-decoration-none text-dark">
+      <a href="RegisterAdmin.jsp" class="text-decoration-none text-dark">
         <div class="dashboard-card">
           <div class="icon text-secondary"><i class="fas fa-user-plus"></i></div>
           <div>
