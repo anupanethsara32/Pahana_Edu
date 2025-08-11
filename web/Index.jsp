@@ -261,7 +261,7 @@
         <h3>Welcome Back!</h3>
         <p>To keep connected with us, please login<br>using your email and password.</p>
         <p class="mt-4 mb-1">Don't have an account?</p>
-        <a href="Register.jsp" class="btn btn-outline-light">SIGN UP</a>
+        <a href="RegisterPublic.jsp" class="btn btn-outline-light">SIGN UP</a>
       </div>
       <div class="footer">
         &copy; 2025 Pahana Edu | support@pahanaedu.com

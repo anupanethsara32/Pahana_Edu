@@ -86,6 +86,7 @@
     <% } %>
 
     <form action="RegisterServlet" method="post" autocomplete="off">
+        
       <input type="hidden" name="adminMode" value="1"/>
 
       <div class="mb-3">
