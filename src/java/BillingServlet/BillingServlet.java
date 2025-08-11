@@ -235,7 +235,7 @@ public class BillingServlet extends HttpServlet {
                 ds = null;
             }
             // Ensure driver present for fallback
-            try { Class.forName("com.mysql.cj.jdbc.Driver"); } catch (ClassNotFoundException e) { /* ignore */ }
+            try { Class.forName("com.mysql.cj.jdbc.Driver"); } catch (ClassNotFoundException e) {    /* ignore */ }
         }
 
         static Connection getConnection() throws SQLException {

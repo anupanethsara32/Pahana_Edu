@@ -1,5 +1,5 @@
 // ------------------------------
-// RegisterServlet.java
+// RegisterServlet.java  
 // ------------------------------
 import java.io.IOException;
 import java.sql.*;
@@ -10,84 +10,119 @@ import javax.servlet.http.*;
 
 @WebServlet("/RegisterServlet")
 public class RegisterServlet extends HttpServlet {
-    private static final String DB_URL = "jdbc:mysql://localhost:3306/pahana_edu_db";
+
+    // DB config (keep simple)
+    private static final String DB_URL  = "jdbc:mysql://localhost:3306/pahana_edu_db";
     private static final String DB_USER = "root";
     private static final String DB_PASS = "";
 
+    @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // Form parameters
-        String firstName = request.getParameter("firstName");
-        String lastName = request.getParameter("lastName");
-        String nic = request.getParameter("nic");
-        String telephone = request.getParameter("telephone");
-        String address = request.getParameter("address");
-        String password = request.getParameter("password");
-        String confirmPassword = request.getParameter("confirmPassword");
+        // If this comes from admin form, we redirect back to admin page on success.
+        boolean adminMode = "1".equals(request.getParameter("adminMode"));
 
-        // Validation
-        if (!password.equals(confirmPassword)) {
-            request.setAttribute("message", "Passwords do not match!");
-            request.getRequestDispatcher("Register.jsp").forward(request, response);
+        // 1) Read form params
+        String firstName = nv(request.getParameter("firstName"));
+        String lastName  = nv(request.getParameter("lastName"));
+        String nic       = nv(request.getParameter("nic"));
+        String telephone = nv(request.getParameter("telephone"));
+        String address   = nv(request.getParameter("address"));
+        String password  = request.getParameter("password");          // NOTE: hash in prod
+        String confirm   = request.getParameter("confirmPassword");
+
+        // 2) Quick validation
+        if (firstName.isEmpty() || lastName.isEmpty() || nic.isEmpty()
+                || telephone.isEmpty() || address.isEmpty()
+                || password == null || confirm == null) {
+            fail("All fields are required.", adminMode, request, response);
+            return;
+        }
+        if (!password.equals(confirm)) {
+            fail("Passwords do not match!", adminMode, request, response);
             return;
         }
 
-        String accountNo = generateAccountNumber();
-        String username = nic;  // NIC used as username
-
+        // 3) DB work (simple transaction)
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS)) {
+                boolean oldAuto = conn.getAutoCommit();
+                conn.setAutoCommit(false);
 
-                // Check if NIC already exists
-                String checkSql = "SELECT nic FROM users WHERE nic = ?";
-                PreparedStatement checkStmt = conn.prepareStatement(checkSql);
-                checkStmt.setString(1, nic);
-                ResultSet rs = checkStmt.executeQuery();
-
-                if (rs.next()) {
-                    request.setAttribute("message", "This NIC is already registered!");
-                    request.getRequestDispatcher("Register.jsp").forward(request, response);
-                    return;
+                // 3a) NIC duplicate check
+                try (PreparedStatement chk = conn.prepareStatement(
+                        "SELECT 1 FROM users WHERE nic=?")) {
+                    chk.setString(1, nic);
+                    try (ResultSet rs = chk.executeQuery()) {
+                        if (rs.next()) {
+                            conn.rollback();
+                            fail("This NIC is already registered!", adminMode, request, response);
+                            return;
+                        }
+                    }
                 }
 
-                // Insert new user
-                String sql = "INSERT INTO users (account_no, first_name, last_name, nic, telephone, address, password, username, created_at) "
-                           + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-                PreparedStatement pst = conn.prepareStatement(sql);
-                pst.setString(1, accountNo);
-                pst.setString(2, firstName);
-                pst.setString(3, lastName);
-                pst.setString(4, nic);
-                pst.setString(5, telephone);
-                pst.setString(6, address);
-                pst.setString(7, password);
-                pst.setString(8, username);
-                pst.setTimestamp(9, Timestamp.valueOf(LocalDateTime.now()));
+                
+                String accountNo = nextAccountNo(conn);
+                String username  = nic; // use NIC as username
 
-                int rows = pst.executeUpdate();
+                
+                try (PreparedStatement pst = conn.prepareStatement(
+                        "INSERT INTO users (account_no, first_name, last_name, nic, telephone, address, password, username, created_at) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")) {
 
-                if (rows > 0) {
-                    // Redirect to a styled success page
-                   response.sendRedirect("Register.jsp?message=success");
+                    pst.setString(1, accountNo);
+                    pst.setString(2, firstName);
+                    pst.setString(3, lastName);
+                    pst.setString(4, nic);
+                    pst.setString(5, telephone);
+                    pst.setString(6, address);
+                    pst.setString(7, password); // TODO: hash in production
+                    pst.setString(8, username);
+                    pst.setTimestamp(9, Timestamp.valueOf(LocalDateTime.now()));
 
-                } else {
-                    request.setAttribute("message", "Registration failed. Please try again.");
-                    request.getRequestDispatcher("Register.jsp").forward(request, response);
+                    int rows = pst.executeUpdate();
+                    if (rows > 0) {
+                        conn.commit();
+                        // Success → redirect (prevents duplicate on refresh)
+                        response.sendRedirect(adminMode
+                                ? "RegisterAdmin.jsp?message=success"
+                                : "RegisterPublic.jsp?message=success");
+                    } else {
+                        conn.rollback();
+                        fail("Registration failed. Please try again.", adminMode, request, response);
+                    }
+                } finally {
+                    conn.setAutoCommit(oldAuto);
                 }
             }
-
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("message", "Server error: " + e.getMessage());
-            request.getRequestDispatcher("Register.jsp").forward(request, response);
+            fail("Server error: " + e.getMessage(), adminMode, request, response);
         }
     }
 
-    // Generates a random account number
-    private String generateAccountNumber() {
-        int random = (int) (Math.random() * 100000);
-        return "PAH-" + String.format("%05d", random);
+    // Generate PAH-xxxxx using MAX + 1 (kept simple)
+    private String nextAccountNo(Connection conn) throws SQLException {
+        String sql = "SELECT COALESCE(MAX(CAST(SUBSTRING(account_no,5) AS UNSIGNED)),10000) AS max_acc FROM users";
+        try (Statement st = conn.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            int max = 10000;
+            if (rs.next()) max = rs.getInt("max_acc");
+            return "PAH-" + (max + 1);
+        }
     }
+
+    // Small helper: fail & forward back to correct JSP
+    private void fail(String msg, boolean adminMode,
+                      HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        request.setAttribute("message", msg);
+        request.getRequestDispatcher(adminMode ? "RegisterAdmin.jsp" : "RegisterPublic.jsp")
+               .forward(request, response);
+    }
+
+    private static String nv(String s){ return s == null ? "" : s.trim(); }
 }
