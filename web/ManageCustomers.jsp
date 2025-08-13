@@ -144,7 +144,7 @@
   </form>
 
   <!-- Add Customer Button -->
-  <a href="Register.jsp" class="btn btn-success mb-3">+ Add New Customer</a>
+  <a href="RegisterAdmin.jsp" class="btn btn-success mb-3">+ Add New Customer</a>
 
   <!-- Customers Table -->
   <table class="table table-bordered">
@@ -195,11 +195,38 @@
         <td><%= rs.getString("telephone") %></td>
         <td>
           <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editModal<%= rs.getString("username") %>">Edit</button>
-          <form action="CustomerActionServlet" method="post" style="display:inline;">
-            <input type="hidden" name="action" value="delete">
-            <input type="hidden" name="username" value="<%= rs.getString("username") %>">
-            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure to delete this customer?');">Delete</button>
-          </form>
+
+                <!-- Delete Button that opens modal -->
+                <button type="button" 
+                        class="btn btn-danger btn-sm" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#deleteModal<%= rs.getString("username") %>">
+                    Delete
+                </button>
+
+                <!-- Delete Confirmation Modal -->
+                <div class="modal fade" id="deleteModal<%= rs.getString("username") %>" tabindex="-1">
+                  <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-danger">
+                      <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title">Confirm Delete</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                      </div>
+                      <div class="modal-body">
+                        Are you sure you want to delete customer <strong><%= rs.getString("first_name") %> <%= rs.getString("last_name") %></strong>?
+                      </div>
+                      <div class="modal-footer">
+                        <form action="CustomerActionServlet" method="post">
+                          <input type="hidden" name="action" value="delete">
+                          <input type="hidden" name="username" value="<%= rs.getString("username") %>">
+                          <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                        </form>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
           <a href="ViewCustomerDetails.jsp?username=<%= rs.getString("username") %>" class="btn btn-info btn-sm"> Customer Account Information</a>
 
           <!-- Edit Modal -->
@@ -231,6 +258,9 @@
                       <input type="text" name="address" class="form-control" value="<%= rs.getString("address") %>" required>
                     </div>
                   </div>
+                    
+                    
+                    
                   <div class="modal-footer">
                     <button type="submit" class="btn btn-success">Update</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>

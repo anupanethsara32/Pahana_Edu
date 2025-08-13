@@ -139,6 +139,48 @@
 
 <!-- Main Content -->
 <div class="content">
+
+  <!-- Password update alerts -->
+  <%
+    String pwd = request.getParameter("pwd");
+    if ("ok".equals(pwd)) {
+  %>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      <i class="fa-solid fa-check-circle me-2"></i>Password updated successfully.
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  <%
+    } else if ("fail".equals(pwd)) {
+  %>
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      <i class="fa-solid fa-triangle-exclamation me-2"></i>Please enter a new password.
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  <%
+    } else if ("short".equals(pwd)) {
+  %>
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      <i class="fa-solid fa-triangle-exclamation me-2"></i>Password must be at least 6 characters.
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  <%
+    } else if ("notfound".equals(pwd)) {
+  %>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      <i class="fa-solid fa-circle-xmark me-2"></i>User not found. Try again.
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  <%
+    } else if ("err".equals(pwd)) {
+  %>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      <i class="fa-solid fa-circle-xmark me-2"></i>Server error. Please try again later.
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  <%
+    }
+  %>
+
   <!-- Welcome / header -->
   <div class="header-bar d-flex align-items-center gap-3 flex-wrap">
     <div class="avatar"><%= user.getInitials() %></div>
