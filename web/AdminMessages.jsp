@@ -24,79 +24,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
-
   <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f8f9fa;
-      margin: 0;
-    }
-    .sidebar {
-      height: 100vh;
-      width: 250px;
-      position: fixed;
-      left: 0;
-      top: 0;
-      background-color: #0097c2;
-      color: white;
-      padding-top: 20px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-    
-    .sidebar h4 {
-      text-align: center;
-      font-weight: bold;
-      margin-bottom: 20px;
-    }
-    .sidebar a {
-      display: block;
-      padding: 12px 20px;
-      color: white;
-      text-decoration: none;
-      transition: background 0.3s;
-    }
-    .sidebar a:hover {
-      background-color: #0abcf9;
-    }
-    .logout-btn {
-      margin: 20px;
-      background-color: #dc3545 !important;
-      border-radius: 30px;
-      padding: 12px 0;
-      font-weight: bold;
-      text-align: center;
-      color: white !important;
-      text-decoration: none;
-      display: block;
-      transition: background-color 0.3s ease;
-    }
-    .logout-btn:hover {
-      background-color: #b02a37 !important;
-    }
-    .content {
-      margin-left: 250px;
-      padding: 30px;
-    }
-    table td {
-      word-break: break-word;
-    }
-    @media (max-width: 768px) {
-      .sidebar {
-        width: 100%;
-        height: auto;
-        position: relative;
-      }
-      .content {
-        margin-left: 0;
-      }
-    }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; margin: 0; }
+    .sidebar { height: 100vh; width: 250px; position: fixed; left: 0; top: 0; background-color: #0097c2; color: white; padding-top: 20px; display: flex; flex-direction: column; justify-content: space-between; }
+    .sidebar h4 { text-align: center; font-weight: bold; margin-bottom: 20px; }
+    .sidebar a { display: block; padding: 12px 20px; color: white; text-decoration: none; transition: background 0.3s; }
+    .sidebar a:hover { background-color: #0abcf9; }
+    .logout-btn { margin: 20px; background-color: #dc3545 !important; border-radius: 30px; padding: 12px 0; font-weight: bold; text-align: center; color: white !important; text-decoration: none; display: block; transition: background-color 0.3s ease; }
+    .logout-btn:hover { background-color: #b02a37 !important; }
+    .content { margin-left: 250px; padding: 30px; }
+    table td { word-break: break-word; }
+    @media (max-width: 768px) { .sidebar { width: 100%; height: auto; position: relative; } .content { margin-left: 0; } }
   </style>
 </head>
 
 <body>
-
 <!-- Sidebar -->
 <div class="sidebar">
   <div>
@@ -110,17 +52,15 @@
     <a href="AdminMessages.jsp"><i class="fas fa-envelope me-2"></i>Contact Messages</a>
     <a href="AdminHelp.jsp"><i class="fas fa-info-circle me-2"></i>Help</a>
   </div>
-  <a href="logout.jsp" class="logout-btn" data-bs-toggle="modal" data-bs-target="#logoutModal">
-  <i class="fas fa-power-off me-2"></i>Exit System
-</a>
-
+  <a href="#" class="logout-btn" data-bs-toggle="modal" data-bs-target="#logoutModal">
+    <i class="fas fa-power-off me-2"></i>Exit System
+  </a>
 </div>
 
 <!-- Main Content -->
 <div class="content">
   <div class="container">
     <h2 class="mb-4" style="color:#000;">Contact Messages</h2>
-
     <div class="table-responsive">
       <table class="table table-bordered table-hover">
         <thead class="table-light">
@@ -135,11 +75,11 @@
             Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/pahana_edu_db", "root", "");
             Statement stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT * FROM contact_messages ORDER BY submitted_at DESC");
-
             while (rs.next()) {
+              int msgId = rs.getInt("id");
         %>
           <tr>
-            <td><%= rs.getInt("id") %></td>
+            <td><%= msgId %></td>
             <td><%= rs.getString("name") %></td>
             <td><%= rs.getString("email") %></td>
             <td><%= rs.getString("phone") %></td>
@@ -147,10 +87,33 @@
             <td><%= rs.getString("message") %></td>
             <td><%= rs.getTimestamp("submitted_at") %></td>
             <td>
-              <form method="post" onsubmit="return confirm('Are you sure you want to delete this message?');">
-                <input type="hidden" name="delete_id" value="<%= rs.getInt("id") %>">
-                <button class="btn btn-sm btn-danger" title="Delete"><i class="fas fa-trash-alt"></i></button>
-              </form>
+              <!-- Trigger Delete Modal -->
+              <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal_<%= msgId %>">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+
+              <!-- Delete Confirmation Modal -->
+              <div class="modal fade" id="deleteModal_<%= msgId %>" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                  <div class="modal-content border-danger">
+                    <div class="modal-header bg-danger text-white">
+                      <h5 class="modal-title">Confirm Delete</h5>
+                      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                      Are you sure you want to delete the message from 
+                      <strong><%= rs.getString("name") %></strong>?
+                    </div>
+                    <div class="modal-footer">
+                      <form method="post" class="m-0">
+                        <input type="hidden" name="delete_id" value="<%= msgId %>">
+                        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                      </form>
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </td>
           </tr>
         <%
@@ -165,7 +128,7 @@
     </div>
   </div>
 </div>
-        
+
 <!-- Logout Confirmation Modal -->
 <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">

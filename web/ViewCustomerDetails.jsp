@@ -109,8 +109,8 @@
         <h3 class="mb-1">Customer Dashboard</h3>
         <div class="small opacity-75">Welcome, <strong><%= first %> <%= last %></strong> • Account <strong><%= accountNo %></strong></div>
       </div>
-      <a href="UserBills.jsp" class="btn btn-light btn-sm ms-auto">
-        <i class="fa-solid fa-receipt me-1"></i> View Bill Images
+      <a href="ManageCustomers.jsp" class="btn btn-light btn-sm ms-auto">
+        Back to Manage Customer
       </a>
     </div>
   </div>
